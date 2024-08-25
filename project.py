@@ -17,7 +17,6 @@ vars_repressors = ['NoneRepressors', 'SomeRepressors','AllRepressors']
 
 # Generate all input pairs
 inputs = [(x, y) for y in vars_repressors for x in vars_activators]
-print(inputs)
 num_functions = 2 ** len(inputs) # 2^(3*3)
 
 filtered_functions = []
