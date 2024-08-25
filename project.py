@@ -23,22 +23,58 @@ EXPECTED_REGULATION_CONDITIONS = [
     (1, 1, 1, 0, 1, 1, 0, 1, 1),
     (1, 1, 1, 1, 1, 1, 0, 1, 1),
 ]
+
 EXPECTED_NUM_REGULATION_CONDITIONS = len(EXPECTED_REGULATION_CONDITIONS)
 
 def fully_activated_deactivated(function):
+    """
+    Checks if the function is fully activated and deactivated in the required columns (All Activators and None Repressors, None Activators and All Repressors, respectively).
+
+    Args:
+        function (list): List representing the function.
+
+    Returns:
+        bool: True if the function is fully activated and deactivated in the required columns, False otherwise.
+    """
     return function[2] and not function[6]
 
 def monotonic_activators(function, index0, index1, index2):
+    """
+    Checks if the function is monotonic with respect to activators.
+
+    Args:
+        function (list): List representing the function.
+        index0, index1, index2 (int): Indices of the columns to check.
+
+    Returns:
+        bool: True if the function meets the monotonic activator condition, False otherwise.
+    """
     none_enough = function[index0] and function[index1] and function[index2]
     some_enough = not function[index0] and ((function[index1] and function[index2]) or not function[index1])
     return none_enough or some_enough
 
 def monotonic_repressors(function, index0, index1, index2):
+    """
+    Checks if the function is monotonic with respect to repressors.
+
+    Args:
+        function (list): List representing the function.
+        index0, index1, index2 (int): Indices of the repressor variables to check.
+
+    Returns:
+        bool: True if the function meets the monotonic repressor condition, False otherwise.
+    """
     none_enough = not function[index0] and not function[index1] and not function[index2]
     some_enough = function[index0] and ((not function[index1] and not function[index2]) or function[index1])
     return none_enough or some_enough
 
 def plot_functions(df: pd.DataFrame):
+    """
+    Plots the DataFrame as an image.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the function data to plot.
+    """
     plt.figure(figsize=(12, 8))
     
     cmap = mcolors.ListedColormap(["white", "darkred"])
@@ -59,7 +95,13 @@ def plot_functions(df: pd.DataFrame):
     plt.show() 
  
  
-def initialize_network():
+def initialize_functions():
+    """
+    Initializes the functions by generating input pairs and computing the number of functions.
+
+    Returns:
+        tuple: (list of input pairs, number of functions)
+    """
     vars_activators = ['NoneActivators', 'SomeActivators','AllActivators']
     vars_repressors = ['NoneRepressors', 'SomeRepressors','AllRepressors']
 
@@ -69,10 +111,20 @@ def initialize_network():
     return inputs, num_functions
 
 def filter(inputs, num_functions):
+    """
+    Filters functions based on monotonicity conditions.
+
+    Args:
+        inputs (list): List of input pairs.
+        num_functions (int): Total number of functions.
+
+    Returns:
+        list: List of filtered functions that meet the monotonic conditions.
+    """
     filtered_functions = []
     for i in range(num_functions):
         # convert the index to binary to create the output function
-        function = [(i >> j) & 1 for j in range(len(inputs))]
+        function = [(i // (2 ** j)) % 2 for j in range(len(inputs))]
         if not fully_activated_deactivated(function):
             continue
         if not monotonic_activators(function, 0,1,2) or not monotonic_activators(function, 3, 4, 5) or not monotonic_activators(function, 6, 7, 8):
@@ -86,16 +138,17 @@ def filter(inputs, num_functions):
 
 
 def main():
-    inputs, num_functions = initialize_network()
+    inputs, num_functions = initialize_functions()
     filtered_functions = filter(inputs, num_functions)
     
     index_map = {tuple(val): idx for idx, val in enumerate(EXPECTED_REGULATION_CONDITIONS)}
     sorted_filtered_functions = sorted(filtered_functions, key=lambda x: index_map[tuple(x)])
-    print(sorted_filtered_functions)
 
     data = np.array(sorted_filtered_functions)
     df = pd.DataFrame(data, columns=inputs)
     plot_functions(df)
+    
+    df.to_csv("monotonic_regulation_conditions.csv")
 
 if __name__ == "__main__":
     main()
