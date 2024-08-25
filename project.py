@@ -88,9 +88,12 @@ def filter(inputs, num_functions):
 def main():
     inputs, num_functions = initialize_network()
     filtered_functions = filter(inputs, num_functions)
+    
+    index_map = {tuple(val): idx for idx, val in enumerate(EXPECTED_REGULATION_CONDITIONS)}
+    sorted_filtered_functions = sorted(filtered_functions, key=lambda x: index_map[tuple(x)])
+    print(sorted_filtered_functions)
 
-
-    data = np.array(filtered_functions)
+    data = np.array(sorted_filtered_functions)
     df = pd.DataFrame(data, columns=inputs)
     plot_functions(df)
 
