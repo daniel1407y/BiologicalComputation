@@ -20,6 +20,6 @@ The results can be seen below:
 ```
 git clone https://github.com/daniel1407y/BiologicalComputation.git
 ```
-- Run`main.py`.
+- Run`project.py`.
 
 The output is presented in the table opened at the end of the running code, and in `monotonic_regulation_conditions.csv`as well.
